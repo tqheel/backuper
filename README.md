@@ -15,6 +15,10 @@ Change the app.config file settings to match your source and destination directo
 ```
 <add key="sourceFolder" value="YourSourceFolderGoesHere"/>
 <add key="detinationFolder" value="YourDestinationFolderGoesHere"/>
+<!--Values for the following are either "files" or "folder"-->
+<add key ="filesOrFolder" value="files"/>
+<!--If above key is "files", the following key is a comma delimited list of file names to backup.-->
+<add key="fileNames" value="FileName1.txt,FileName2.xlsx"/>
 ```
 Compile the source to an executable and copy the .exe and .config files from the project bin folder.
 
@@ -23,7 +27,8 @@ I find it useful to setup a Windows scheduled task to run this .exe every night.
 Future Plans
 ============
 - Read-in source and destination directories from a database or xml file, so that multiple directories can be backed-up in one run.
-- Compress files into a timestamped Zip archive, to enable storing multiple versions of files in case of source corrunption.
+- Add capability to specify multiple directories to backup.
+- Add a GUI for specifying folders and/or files to backup.
 - I also like the idea of using Azure storage or Amazon S3 as the backup destination, rather than a traditional file system.
 
 
