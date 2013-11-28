@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
 using System.IO;
+using System.IO.Compression;
 
 namespace backuper
 {
@@ -12,24 +13,35 @@ namespace backuper
     {
         private static string source = ConfigurationSettings.AppSettings.Get("sourceFolder");
         private static string destination = ConfigurationSettings.AppSettings.Get("detinationFolder");
+        private static string backupType = ConfigurationSettings.AppSettings.Get("filesOrFolder");
+        
         static void Main(string[] args)
         {
-            //create all the directories
-            foreach (string dirPath in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
+            //generate new timestamped filename for zip archive
+            string zipFileName = destination + @"\" + DateTime.Now.Year.ToString() + DateTime.Now.Month.ToString() +
+                    DateTime.Now.Day.ToString() + DateTime.Now.Hour.ToString() + DateTime.Now.Minute.ToString() +
+                    DateTime.Now.Second.ToString() + ".zip";
+
+            if (backupType == BackupType.folder.ToString())
             {
-                string newDir = dirPath.Replace(source, destination);
-                if (!Directory.Exists(newDir))
+                Console.WriteLine("Writing " + source + " to archive file " + zipFileName + "...");
+                ZipFile.CreateFromDirectory(source, zipFileName, CompressionLevel.Optimal, false);
+            }
+            else
+            {
+                string fileNamesFromConfig = ConfigurationSettings.AppSettings.Get("fileNames");
+                string[] files = fileNamesFromConfig.Split(',');
+                using (ZipArchive archive = ZipFile.Open(zipFileName, ZipArchiveMode.Update))
                 {
-                    Console.WriteLine("Creating directory " + newDir + "...");
-                    Directory.CreateDirectory(newDir);
+                    foreach (string f in files)
+                    {
+                        string filePath = source + @"\" + f;
+                        Console.WriteLine("Writing " + filePath + " to archive file " + zipFileName + "...");
+                        archive.CreateEntryFromFile(filePath, f, CompressionLevel.Optimal);
+                    }
                 }
             }
-            //copy files
-            foreach (string newPath in Directory.GetFiles(source, "*.*", SearchOption.AllDirectories))
-            {
-                Console.WriteLine("Copying " + newPath + "...");
-                File.Copy(newPath, newPath.Replace(source, destination), true);
-            }
+
         }
     }
 }
